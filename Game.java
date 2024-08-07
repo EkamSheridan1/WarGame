@@ -1,58 +1,68 @@
-/**
- * SYST 17796 Project Base code.
- * Students can modify and extend to implement their game.
- * Add your name as an author and the date!
- */
-package ca.sheridancollege.project;
+import java.util.Scanner;
 
-import java.util.ArrayList;
+public class Game {
+    private GroupOfCards deck;
+    private Player player;
+    private Player ai;
+    private Scanner scanner;
 
-/**
- * The class that models your game. You should create a more specific child of this class and instantiate the methods
- * given.
- *
- * @author dancye
- * @author Paul Bonenfant Jan 2020
- */
-public abstract class Game {
+    public Game() {
+        scanner = new Scanner(System.in);
 
-    private final String name;//the title of the game
-    private ArrayList<Player> players;// the players of the game
+        // Ask for the player's name
+        System.out.print("Enter your name: ");
+        String playerName = scanner.nextLine();
 
-    public Game(String name) {
-        this.name = name;
-        players = new ArrayList();
+        deck = new GroupOfCards();
+        player = new Player(playerName);
+        ai = new Player("AI");
+
+        deck.initializeDeck();
+        deck.shuffle();
     }
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
+    public void playTurn() {
+        // Player's turn
+        System.out.println(player.getName() + ", it's your turn.");
+        System.out.println("Your hand: " + player.showHand());
+        System.out.println("Enter the rank of the card you want to play (2-10, Jack, Queen, King, Ace): ");
+        String rank = scanner.nextLine();
+        System.out.println("Enter the suit of the card you want to play (Hearts, Diamonds, Clubs, Spades): ");
+        String suit = scanner.nextLine();
+        
+        String cardDescription = rank + " of " + suit;
+        Card playedCard = player.playSpecificCard(cardDescription);
+        
+        if (playedCard != null) {
+            System.out.println(player.getName() + " plays: " + playedCard);
+        } else {
+            System.out.println("Invalid card. Please try again.");
+        }
+
+        // AI's turn
+        ai.drawCard(deck);
+        Card aiPlayedCard = ai.playCard();
+        if (aiPlayedCard != null) {
+            System.out.println(ai.getName() + " plays: " + aiPlayedCard);
+        }
+
+        // Display remaining cards in the deck
+        System.out.println("Remaining cards in deck: " + deck.getRemainingCards());
     }
 
-    /**
-     * @return the players of this game
-     */
-    public ArrayList<Player> getPlayers() {
-        return players;
+    public void startGame() {
+        while (!isGameOver()) {
+            playTurn();
+        }
+        System.out.println("Game Over!");
     }
 
-    /**
-     * @param players the players of this game
-     */
-    public void setPlayers(ArrayList<Player> players) {
-        this.players = players;
+    private boolean isGameOver() {
+        return deck.getRemainingCards() == 0;
     }
 
-    /**
-     * Play the game. This might be one method or many method calls depending on your game.
-     */
-    public abstract void play();
-
-    /**
-     * When the game is over, use this method to declare and display a winning player.
-     */
-    public abstract void declareWinner();
-
-}//end class
+    public static void main(String[] args) {
+        Game game = new Game();
+        game.startGame();
+    }
+}
